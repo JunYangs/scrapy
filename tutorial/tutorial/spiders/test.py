@@ -1,1 +1,2 @@
 print("nihao")
+print("hello")
