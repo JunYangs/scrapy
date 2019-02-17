@@ -1,2 +1,0 @@
-print("nihao")
-print("hello")
