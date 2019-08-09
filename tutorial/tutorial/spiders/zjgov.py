@@ -40,7 +40,6 @@ class ZjGov(scrapy.Spider):
         # for page in response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]'):  # 其它页
         #     urlNext = page.xpath('').extract()[0]
         #     yield scrapy.Request(urlNext, callback=self.parseNext)
-        return
 
     def parseNext(self, response):
         for i in response.xpath('//*[@id="xzcf_1"]/table'):
