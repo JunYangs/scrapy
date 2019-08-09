@@ -2,13 +2,15 @@
 # -*- coding: UTF-8 -*-
 
 '''
-#########################
+************************
  Written by : QiuJunYang
  Date: 08/08/2019
-#########################
+************************
 '''
 
+import re
 import scrapy
+from tutorial.items import TutorialItem
 
 
 class ZjGov(scrapy.Spider):
@@ -27,15 +29,25 @@ class ZjGov(scrapy.Spider):
 
     def parse(self, response):
         yield scrapy.Request(response.url, callback=self.parseNext)  # 第一页
-        pageNum = response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]').extract()[0]
-
+        pageNum = response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]/text()').extract()[0]
+        pageNum = re.compile(r'\d+').findall(pageNum)[0]  # 总页数
         urlSplit = self.start_urls[0].split('=', 3)  # 其它页
         urlNext = urlSplit[0]+'='+urlSplit[1]+'='+urlSplit[2]+'='
-        for i in range(0, pageNum):
+        print(urlNext)
+        for i in range(2, int(pageNum)+1):
             yield scrapy.Request(urlNext+'%d' % i, callback=self.parseNext)
+
         # for page in response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]'):  # 其它页
         #     urlNext = page.xpath('').extract()[0]
         #     yield scrapy.Request(urlNext, callback=self.parseNext)
+        return
 
     def parseNext(self, response):
-        pass
+        for i in response.xpath('//*[@id="xzcf_1"]/table'):
+            item = TutorialItem()
+            item['caseName'] = i.xpath('tr/td[1]/a/text()').extract()[0]   # 案件名称
+            item['name'] = i.xpath('tr/td[2]/text()').extract()[0]   # 被处罚对象
+            item['documentNo'] = i.xpath('tr/td[3]/text()').extract()[0]  # 行政处罚决定书文号
+            item['date'] = i.xpath('tr/td[4]/text()').extract()[0]  # 处罚日期
+            item['detailUrl'] = i.xpath('tr/td[1]/a/@href').extract()[0]  # 详细内容url
+            yield item
