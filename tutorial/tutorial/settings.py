@@ -89,3 +89,16 @@ AUTOTHROTTLE_MAX_DELAY = 60
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# 日志设置
+# LOG_LEVEL
+'''
+    CRITICAL  严重错误
+    ERROR  般错误
+    WARNNING  警告信息
+    INFO  般信息
+    DEBUG  调试信息
+'''
+LOG_ENABLED = True
+LOG_LEVEL = 'DEBUG'
+LOG_FILE = 'log.txt'
