@@ -10,6 +10,7 @@
 
 import re
 import scrapy
+import tutorial.ISConstant
 from tutorial.items import TutorialItem
 
 
@@ -20,26 +21,24 @@ class ZjGov(scrapy.Spider):
          'http://www.zjzwfw.gov.cn/zjzw/punish/frontpunish/searchall_list.do?areacode=330101&xzcf_code=&pageNo=1'
     ]
 
-    # 页码处理
-    def parseOther(self, response):
+    # 总页码号和URL拼接
+    def parseOther(self, response, cityUrl):
         pageNum = response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]/text()').extract()[0]
         pageNum = re.compile(r'\d+').findall(pageNum)[0]  # 总页数
         # Url拆分合并
-        urlSplit = self.start_urls[0].split('=', 3)  # 下一页
+        urlSplit = cityUrl.split('=', 3)  # 下一页
         urlNext = urlSplit[0] + '=' + urlSplit[1] + '=' + urlSplit[2] + '='
         list = [pageNum, urlNext]
         return list
 
-    # 页面解析
+    # 页面解析（获取各地市数据，得到全省总数据）
     def parse(self, response):
-        yield scrapy.Request(response.url, callback=self.parseNext)  # 第一页
-        # pageNum = self.parseOther(response)[0]
-        # urlNext = self.parseOther(response)[1]
-        flag = True
-        while flag:
-            for i in range(2, int(self.parseOther(response)[0])+1):
-                yield scrapy.Request(self.parseOther(response)[1]+str(i), callback=self.parseNext)
-            flag = False
+        for cityUrl in list(tutorial.ISConstant.cityUrl.values()):  # ISConstant.py文件
+            yield scrapy.Request(cityUrl, callback=self.parseNext)  # 第一页
+            pageNum = self.parseOther(response, cityUrl)[0]  # 各市总页数
+            urlNext = self.parseOther(response, cityUrl)[1]  # 下一页
+            for i in range(2, int(pageNum)+1):
+                yield scrapy.Request(urlNext+str(i), callback=self.parseNext)
 
     # 页面信息处理
     def parseNext(self, response):
