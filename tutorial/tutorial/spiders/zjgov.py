@@ -21,7 +21,7 @@ class ZjGov(scrapy.Spider):
          'http://www.zjzwfw.gov.cn/zjzw/punish/frontpunish/searchall_list.do?areacode=330101&xzcf_code=&pageNo=1'
     ]
 
-    # 总页码号和URL拼接
+    # URL拼接
     def parseOther(self, response, cityUrl):
         pageNum = response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]/text()').extract()[0]
         pageNum = re.compile(r'\d+').findall(pageNum)[0]  # 总页数
@@ -31,16 +31,16 @@ class ZjGov(scrapy.Spider):
         list = [pageNum, urlNext]
         return list
 
-    # 页面解析（获取各地市数据，得到全省总数据）
+    # 页面获取
     def parse(self, response):
-        for cityUrl in list(tutorial.ISConstant.cityUrl.values()):  # ISConstant.py文件
+        for cityUrl in list(tutorial.ISConstant.cityUrl.values()):  # ISConstant.py常量
             yield scrapy.Request(cityUrl, callback=self.parseNext)  # 第一页
-            pageNum = self.parseOther(response, cityUrl)[0]  # 各市总页数
+            pageNum = self.parseOther(response, cityUrl)[0]  # 总页数
             urlNext = self.parseOther(response, cityUrl)[1]  # 下一页
             for i in range(2, int(pageNum)+1):
                 yield scrapy.Request(urlNext+str(i), callback=self.parseNext)
 
-    # 页面信息处理
+    # 页面解析
     def parseNext(self, response):
         for i in response.xpath('//*[@id="xzcf_1"]/table'):
             item = TutorialItem()
