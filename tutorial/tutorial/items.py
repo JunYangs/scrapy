@@ -14,5 +14,5 @@ class TutorialItem(scrapy.Item):
     name = scrapy.Field()  # 被处罚对象
     documentNo = scrapy.Field()  # 行政处罚决定书文号
     date = scrapy.Field()  # 处罚日期
-    detailUrl = scrapy.Field()  # 详细内容url
+    detail = scrapy.Field()  # 详细内容
 
