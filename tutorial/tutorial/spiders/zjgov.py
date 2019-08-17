@@ -10,6 +10,8 @@
 
 import re
 import scrapy
+import requests
+from lxml import etree
 import tutorial.ISConstant
 from tutorial.items import TutorialItem
 
@@ -26,8 +28,8 @@ class ZjGov(scrapy.Spider):
         pageNum = response.xpath('//*[@id="xzcf_1"]/div/ul/li[6]/text()').extract()[0]
         pageNum = re.compile(r'\d+').findall(pageNum)[0]  # 总页数
         # Url拆分合并
-        urlSplit = cityUrl.split('=', 3)  # 下一页
-        urlNext = urlSplit[0] + '=' + urlSplit[1] + '=' + urlSplit[2] + '='
+        urlSplit = cityUrl.split('=', 3)  # 拆分
+        urlNext = urlSplit[0] + '=' + urlSplit[1] + '=' + urlSplit[2] + '='  # 合并
         list = [pageNum, urlNext]
         return list
 
@@ -42,11 +44,20 @@ class ZjGov(scrapy.Spider):
 
     # 页面解析
     def parseNext(self, response):
+        urlHead = tutorial.ISConstant.SITEURL
         for i in response.xpath('//*[@id="xzcf_1"]/table'):
             item = TutorialItem()
             item['caseName'] = i.xpath('tr/td[1]/a/text()').extract()[0]   # 案件名称
             item['name'] = i.xpath('tr/td[2]/text()').extract()[0]   # 被处罚对象
             item['documentNo'] = i.xpath('tr/td[3]/text()').extract()[0]  # 行政处罚决定书文号
             item['date'] = i.xpath('tr/td[4]/text()').extract()[0]  # 处罚日期
-            item['detailUrl'] = i.xpath('tr/td[1]/a/@href').extract()[0]  # 详细内容url
+            urltail = i.xpath('tr/td[1]/a/@href').extract()[0]  # 行政处罚详细内容URL
+            item['detail'] = self.parseContent(urlHead+urltail)  # 行政处罚详细内容
             yield item
+
+    # 行政处罚详细内容
+    def parseContent(self, url):
+        res = requests.get(url, headers=tutorial.ISConstant.HEADERS).text
+        html = etree.HTML(res)
+        content = html.xpath('/html/body/table[3]/tr/td/table/tr/td/table[5]/tr/td/p/text()')
+        return content
