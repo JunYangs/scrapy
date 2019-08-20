@@ -102,3 +102,7 @@ AUTOTHROTTLE_MAX_DELAY = 60
 LOG_ENABLED = True
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = 'log.txt'
+
+
+# 增量模式下，非增量数据阈值（超过阈值停止）
+THRESHOLD_VALUE = 50
