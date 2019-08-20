@@ -35,8 +35,8 @@ class ZjGov(scrapy.Spider):
 
     # 页面获取
     def parse(self, response):
-        for cityUrl in list(tutorial.ISConstant.cityUrl.values()):  # ISConstant.py常量
-            yield scrapy.Request(cityUrl, callback=self.parseNext)  # 第一页
+        for cityUrl in list(tutorial.ISConstant.cityUrl.values()):
+            yield scrapy.Request(cityUrl, callback=self.parseNext)
             pageNum = self.parseOther(response, cityUrl)[0]  # 总页数
             urlNext = self.parseOther(response, cityUrl)[1]  # 下一页
             for i in range(2, int(pageNum)+1):
@@ -51,7 +51,7 @@ class ZjGov(scrapy.Spider):
             item['name'] = i.xpath('tr/td[2]/text()').extract()[0]   # 被处罚对象
             item['documentNo'] = i.xpath('tr/td[3]/text()').extract()[0]  # 行政处罚决定书文号
             item['date'] = i.xpath('tr/td[4]/text()').extract()[0]  # 处罚日期
-            urltail = i.xpath('tr/td[1]/a/@href').extract()[0]  # 行政处罚详细内容URL
+            urltail = i.xpath('tr/td[1]/a/@href').extract()[0]
             item['detail'] = self.parseContent(urlHead+urltail)  # 行政处罚详细内容
             yield item
 
